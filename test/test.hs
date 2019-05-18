@@ -6,13 +6,13 @@ import           Kerry.Prelude
 
 import           System.Exit (exitFailure)
 
-import qualified Test.Kerry.Reverse
+import qualified Test.Kerry.Serial as Serial
 
 
 main :: IO ()
 main = do
   ok <- and <$> sequence [
-      Test.Kerry.Reverse.tests
+      Serial.tests
     ]
   when (not ok) $
     exitFailure
