@@ -1,0 +1,108 @@
+name:
+  kerry
+version:
+  0.0
+homepage:
+  https://github.com/nhibberd/kerry#readme
+bug-reports:
+  https://github.com/nhibberd/kerry/issues
+synopsis:
+  kerry
+description:
+
+license:
+  BSD3
+category:
+  Application
+license-file:
+  LICENSE
+author:
+  Nick Hibberd <nhibberd@gmail.com>
+maintainer:
+  Nick Hibberd <nhibberd@gmail.com>
+copyright:
+  Copyright: (c) 2019 Nick Hibberd
+build-type:
+  Custom
+extra-doc-files:
+  README.md
+  CHANGELOG.md
+cabal-version:
+  1.18
+
+source-repository head
+  type: git
+  location: git://github.com/nhibberd/kerry.git
+
+custom-setup
+  setup-depends:
+       base                            >= 4.5        && < 5
+    , Cabal                           >= 1.22       && < 2.5
+
+library
+  build-depends:
+      base                            >= 4.5        && < 5
+    , bytestring                      >= 0.10       && < 0.11
+    , containers                      >= 0.5        && < 0.7
+    , errors                          >= 2.0        && < 2.4
+    , mmorph                          >= 1.0        && < 1.2
+    , text                            >= 1.2        && < 1.3
+    , transformers                    >= 0.5        && < 0.6
+    , transformers-bifunctors         >= 0.1        && < 0.2
+
+  default-language:
+    Haskell2010
+
+  ghc-options:
+    -Wall
+
+  hs-source-dirs:
+    src
+
+  exposed-modules:
+    Kerry.Command.Reverse
+    Kerry.Prelude
+    Kerry.Reverse
+
+executable kerry
+  build-depends:
+      kerry
+    , base
+    , optparse-applicative            >= 0.14       && < 0.15
+
+  ghc-options:
+   -Wall -threaded -rtsopts -with-rtsopts=-N
+
+  default-language:
+    Haskell2010
+
+  hs-source-dirs:
+    main
+
+  main-is:
+    kerry.hs
+
+
+test-suite test
+  type:
+    exitcode-stdio-1.0
+
+  hs-source-dirs:
+    test
+
+  main-is:
+    test.hs
+
+  other-modules:
+    Test.Kerry.Reverse
+
+  build-depends:
+      kerry
+    , base
+    , hedgehog                        >= 0.6        && < 0.7
+
+  default-language:
+    Haskell2010
+
+  ghc-options:
+    -Wall -threaded -rtsopts -with-rtsopts=-N
