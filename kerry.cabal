@@ -9,11 +9,12 @@ bug-reports:
 synopsis:
   kerry
 description:
-
+  kerry is a DSL for representing and rendering
+  [packer](https://www.packer.io/) definitions.
 license:
   BSD3
 category:
-  Application
+  Infrastructure, AWS
 license-file:
   LICENSE
 author:
@@ -23,7 +24,7 @@ maintainer:
 copyright:
   Copyright: (c) 2019 Nick Hibberd
 build-type:
-  Custom
+  Simple
 extra-doc-files:
   README.md
   CHANGELOG.md
@@ -34,14 +35,11 @@ source-repository head
   type: git
   location: git://github.com/nhibberd/kerry.git
 
-custom-setup
-  setup-depends:
-       base                            >= 4.5        && < 5
-    , Cabal                           >= 1.22       && < 2.5
-
 library
   build-depends:
       base                            >= 4.5        && < 5
+    , aeson                           >= 1.4        && < 1.5
+    , aeson-pretty                    >= 0.8        && < 1
     , bytestring                      >= 0.10       && < 0.11
     , containers                      >= 0.5        && < 0.7
     , errors                          >= 2.0        && < 2.4
@@ -60,28 +58,11 @@ library
     src
 
   exposed-modules:
-    Kerry.Command.Reverse
+    Kerry.Builders.AmazonEC2
+    Kerry.Data
+    Kerry.Functions
+    Kerry.Example
     Kerry.Prelude
-    Kerry.Reverse
-
-executable kerry
-  build-depends:
-      kerry
-    , base
-    , optparse-applicative            >= 0.14       && < 0.15
-
-  ghc-options:
-   -Wall -threaded -rtsopts -with-rtsopts=-N
-
-  default-language:
-    Haskell2010
-
-  hs-source-dirs:
-    main
-
-  main-is:
-    kerry.hs
-
 
 test-suite test
   type:
