@@ -15,7 +15,7 @@ import           Hedgehog
 
 import           Kerry.Prelude
 import           Kerry.Example (example)
-import           Kerry.Data (fromPacker)
+import           Kerry.Data (Packer, fromPacker)
 import           Kerry.Serial (asByteStringWith)
 
 import           System.Exit (ExitCode (..))
@@ -28,27 +28,18 @@ import qualified Test.Kerry.Gen as Gen
 
 prop_example :: Property
 prop_example =
-  withTests 1 . property . hoist runResourceT $ do
-    (_release, path, handle) <- Temp.openTempFile Nothing "example.json"
-    let
-      raw = asByteStringWith (fromPacker) example
-    annotate $ show raw
-
-    liftIO $ Char8.hPutStrLn handle raw
-    liftIO $ IO.hClose handle
-
-    annotate path
-    (ec, stdout, stderr) <-
-      liftIO $ Process.readProcessWithExitCode "packer" ["validate", path] ""
-    annotate stdout
-    annotate stderr
-
-    assert $ ec == ExitSuccess
+  withTests 1 . property $ do
+    validate example
 
 prop_gen :: Property
 prop_gen =
-  withTests 100 . property . hoist runResourceT $ do
+  withTests 100 . property $ do
     packer <- forAll Gen.genPacker
+    validate packer
+
+validate :: Packer -> PropertyT IO ()
+validate packer =
+  hoist runResourceT $ do
     (_release, path, handle) <- Temp.openTempFile Nothing "example.json"
     let
       raw = asByteStringWith (fromPacker) packer
@@ -64,6 +55,7 @@ prop_gen =
     annotate stderr
 
     assert $ ec == ExitSuccess
+
 
 
 

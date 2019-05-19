@@ -76,12 +76,14 @@ test-suite test
     test.hs
 
   other-modules:
+    Test.Kerry.Gen
     Test.Kerry.Serial
 
   build-depends:
       kerry
     , aeson                           >= 1.4        && < 1.5
     , base
+    , bytestring                      >= 0.10       && < 0.11
     , containers                      >= 0.5        && < 0.7
     , mmorph                          >= 1.0        && < 1.2
     , hedgehog                        >= 1.0        && < 2.0

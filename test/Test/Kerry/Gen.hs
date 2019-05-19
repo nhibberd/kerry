@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Test.Kerry.Gen (
@@ -13,9 +14,9 @@ import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
+import           Kerry.Builder.AmazonEC2
 import           Kerry.Data
 import           Kerry.Prelude
-import           Kerry.Builder.AmazonEC2
 
 
 genPacker :: Gen Packer
