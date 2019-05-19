@@ -25,7 +25,6 @@ import qualified System.Process as Process
 
 import qualified Test.Kerry.Gen as Gen
 
-
 prop_example :: Property
 prop_example =
   withTests 1 . property $ do
@@ -33,7 +32,7 @@ prop_example =
 
 prop_gen :: Property
 prop_gen =
-  withTests 100 . property $ do
+  withShrinks 5 . withTests 100 . property $ do
     packer <- forAll Gen.genPacker
     validate packer
 
@@ -55,8 +54,6 @@ validate packer =
     annotate stderr
 
     assert $ ec == ExitSuccess
-
-
 
 
 tests :: IO Bool

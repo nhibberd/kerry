@@ -48,7 +48,7 @@ genEBSBuilder =
   EBS
     <$> Gen.text (Range.linear 3 10) Gen.alphaNum
     <*> (SourceAmiId . (<>) "ami-" <$> Gen.text (Range.singleton 8) Gen.alphaNum)
-    <*> Gen.text (Range.linear 3 10) Gen.alphaNum
+    <*> Gen.element ["t2.micro", "m4.xlarge", "x1.large"]
     <*> pure Nothing
     <*> pure Nothing
     <*> pure Nothing
@@ -74,7 +74,7 @@ genCommunicator =
 genSSHCommunicator:: Gen SSHCommunicator
 genSSHCommunicator =
   SSHCommunicator
-    <$> Gen.text (Range.linear 3 10) Gen.alphaNum
+    <$> Gen.text (Range.linear 3 10) Gen.alpha
     <*> Gen.bool
     <*> Gen.int (Range.linear 0 10)
 
