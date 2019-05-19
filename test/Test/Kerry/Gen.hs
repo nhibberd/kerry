@@ -1,16 +1,21 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Test.Kerry.Gen (
     genPacker
+  , genBuilder
   , genCommunicator
   , genPostProcessor
   ) where
 
+import qualified Data.List as List
 import qualified Data.Map as Map
+import qualified Data.Text as T
 
 import           Hedgehog
+import           Hedgehog.Corpus (agile)
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
@@ -23,7 +28,7 @@ genPacker :: Gen Packer
 genPacker =
   Packer
     <$> Gen.list (Range.linear 0 10) genVariable
-    <*> Gen.list (Range.linear 1 3) genBuilder
+    <*> genBuilders
     <*> Gen.list (Range.linear 0 10) genProvisioner
     <*> Gen.list (Range.linear 0 0) genPostProcessor
 
@@ -34,16 +39,23 @@ genVariable =
     <$> Gen.text (Range.linear 3 10) Gen.alphaNum
     <*> Gen.text (Range.linear 3 10) Gen.alphaNum
 
-genBuilder :: Gen Builder
-genBuilder =
-  Gen.choice [
-      Builder
-        <$> (AmazonEBSBuilder <$> genEBSBuilder)
-        <*> Gen.maybe (Gen.text (Range.linear 5 5) Gen.alphaNum)
-        <*> (SSH <$> genSSHCommunicator)
-    ]
+genBuilders ::  Gen [Builder]
+genBuilders = do
+  bs <- Gen.list (Range.linear 1 10) genBuilder
+  pure $ List.zipWith ($) bs [1..]
 
-genEBSBuilder :: Gen EBS
+genBuilder :: Gen (Int -> Builder)
+genBuilder = do
+  btype <- AmazonEBSBuilder <$> genEBSBuilder
+  comm <- SSH <$> genSSHCommunicator
+  name <- Gen.maybe $ Gen.element agile
+  pure $ \index ->
+    Builder
+      btype
+      ((\n -> n <> "-" <> T.pack (show index)) <$> name)
+      comm
+
+genEBSBuilder :: MonadGen m => m EBS
 genEBSBuilder =
   EBS
     <$> Gen.text (Range.linear 3 10) Gen.alphaNum
@@ -71,7 +83,7 @@ genCommunicator =
     , pure WinRm
     ]
 
-genSSHCommunicator:: Gen SSHCommunicator
+genSSHCommunicator:: MonadGen m => m SSHCommunicator
 genSSHCommunicator =
   SSHCommunicator
     <$> Gen.text (Range.linear 3 10) Gen.alpha
