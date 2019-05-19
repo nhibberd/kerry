@@ -5,10 +5,13 @@ module Test.Kerry.Serial (
     tests
   ) where
 
-import qualified Data.Aeson as Aeson
 import           Control.Monad.Morph (hoist)
 import           Control.Monad.Trans.Resource (runResourceT)
 import           Control.Monad.IO.Class (liftIO)
+
+--import qualified Data.Aeson as Aeson
+--import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Char8 as Char8
 
 import           Hedgehog
 --import qualified Hedgehog.Gen as Gen
@@ -20,24 +23,25 @@ import           Kerry.Serial (fromPacker, asByteStringWith)
 
 import           System.Exit (ExitCode (..))
 import qualified System.IO.Temp as Temp
---import qualified System.IO as IO
+import qualified System.IO as IO
 import qualified System.Process as Process
 
-import qualified Data.ByteString as ByteString
 
 prop_example :: Property
 prop_example =
-  property . hoist runResourceT $ do
+  withTests 1 . property . hoist runResourceT $ do
     (_release, path, handle) <- Temp.openTempFile (Just "/tmp/nick") "example.json"
 --    let
 --      path = "/tmp/nick/fred.json"
 --    handle <- liftIO $ IO.openFile path IO.WriteMode
     let
-      raw = asByteStringWith (fromPacker $ const Aeson.Null) example
+      raw = asByteStringWith (fromPacker) example
     annotate $ show raw
 
-    liftIO $ ByteString.hPut handle raw
+    liftIO $ Char8.hPutStrLn handle raw
+    liftIO $ IO.hClose handle
 
+    annotate path
     (ec, stdout, stderr) <-
       liftIO $ Process.readProcessWithExitCode "packer" ["validate", path] ""
     annotate stdout

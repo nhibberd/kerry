@@ -2,39 +2,55 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Kerry.Data (
-    Variable (..)
-  , Builder (..)
-  , Provisioners (..)
-  , PostProcessor (..)
-  , Packer (..)
+    Variable(..)
+  , Builder(..)
+  , BuilderType(..)
+  , Provisioner(..)
+  , PostProcessor(..)
+  , Packer(..)
 
-  , Communicator (..)
-  , SSHCommunicator (..)
+  , Communicator(..)
+  , SSHCommunicator(..)
   , defaultSSHCommunicator
   ) where
 
 import           Kerry.Prelude
 
+import qualified Kerry.Builder.AmazonEC2 as AmazonEC2
+
 data Variable =
   Variable Text Text
 
-data Builder a =
+-- This type variable is wrong
+data Builder =
   Builder {
-      builderType :: a
+      builderType :: BuilderType
     , builderCommunicator :: Communicator
     }
 
-data Provisioners =
-  Provisions
+data BuilderType =
+  AmazonEBSBuilder AmazonEC2.EBS
+
+data Provisioner =
+  Provisioner {
+      provisionerType :: Text
+    , provisionerOptions :: Map Text Text
+    , provisionerOnly :: [Text]
+    , provisionerExcept :: [Text]
+    , provisionerPauseBefore :: Maybe Text
+    , provisionerTimeout :: Maybe Text
+    , provisionerOverride :: Map Text (Map Text Text)
+    }
 
 data PostProcessor =
   PostProcessor
 
-data Packer a =
+-- This type variable is wrong
+data Packer =
   Packer {
       variables :: [Variable]
-    , builders :: [Builder a]
-    , provisioners :: [Provisioners]
+    , builders :: [Builder]
+    , provisioners :: [Provisioner]
     , postProcessors :: [PostProcessor]
     }
 

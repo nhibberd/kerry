@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Kerry.Builders.AmazonEC2 (
+module Kerry.Builder.AmazonEC2 (
   -- * General
     Credentials (..)
   , AWSVariables (..)

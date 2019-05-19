@@ -3,23 +3,23 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Kerry.Example (
-    test
+    example
   ) where
 
 import qualified Data.Map as Map
 
 import qualified Kerry.Functions as F
 import           Kerry.Data
-import           Kerry.Builders.AmazonEC2
+import           Kerry.Builder.AmazonEC2
 
 import           Kerry.Prelude
 
-test :: Packer EBS
-test =
+example :: Packer
+example =
   Packer {
       variables = []
     , builders = [
-          Builder ebs ssh
+          Builder (AmazonEBSBuilder ebs) ssh
         ]
     , provisioners = []
     , postProcessors = []
