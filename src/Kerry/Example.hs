@@ -19,7 +19,7 @@ example =
   Packer {
       variables = []
     , builders = [
-          Builder (AmazonEBSBuilder ebs) ssh
+          Builder (AmazonEBSBuilder ebs) Nothing ssh
         ]
     , provisioners = []
     , postProcessors = []
@@ -36,15 +36,15 @@ ebs =
     , ebsSourceAmi = SourceAmiId "ami-fred"
     , ebsInstanceType = "m4.xlarge"
     , ebsAccountId = Nothing
-    , ebsRegion = "us-west-2"
+    , ebsRegion = Just "us-west-2"
     , ebsS3Bucket = Nothing
     , ebsLaunchBlockDeviceMappings = [
           blockDeviceMapping "/dev/xvda" "gp2" 200 True
         ]
 
-    , ebsVpcId = ""
-    , ebsSubnetId = ""
-    , ebsAssociatePublicIpAddress = True
+    , ebsVpcId = Nothing
+    , ebsSubnetId = Nothing
+    , ebsAssociatePublicIpAddress = Just True
     , ebsIAMInstanceProfile = Just "iam-fred"
     , ebsInsecureSkipTLSVerify = Nothing
     , ebsRunTags = Map.fromList [

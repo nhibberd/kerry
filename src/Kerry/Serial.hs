@@ -3,16 +3,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Kerry.Serial (
-
-    fromPacker
-  , fromBuilder
-  , fromBuilderType
-  , fromVariable
-  , fromProvisioner
-  , fromPostProcessor
-
-
-  , list
+    list
+  , listToObject
+  , t
   , (.=?)
 
   , asTextWith
@@ -31,69 +24,7 @@ import qualified Data.Aeson as A
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Types as A
 
-import qualified Data.Map.Strict as Map
-
-import           Kerry.Data
 import           Kerry.Prelude
-
-import qualified Kerry.Builder.AmazonEC2 as AmazonEC2
-
-
--- This type variable is wrong
-fromPacker :: Packer -> Value
-fromPacker p =
-  A.object $ join [
-      "variables" .=? (listToObject <$> list (fromVariable <$> variables p))
-    , "builders" .=? list (fromBuilder <$> builders p)
-    , "provisioners" .=? list (fromProvisioner <$> provisioners p)
-    , "post-processors" .=? list (fromPostProcessor <$> postProcessors p)
-    ]
-
-fromBuilder :: Builder -> Value
-fromBuilder (Builder btype comm) =
-  A.object $ join [
-      fromBuilderType btype
-    , fromCommunicator comm
-    ]
-
-fromBuilderType :: BuilderType -> [A.Pair]
-fromBuilderType = \case
-  AmazonEBSBuilder ebs ->
-    "type" .= t "amazon-ebs" : AmazonEC2.fromEBS ebs
-
-fromCommunicator :: Communicator -> [A.Pair]
-fromCommunicator = \case
-  None ->
-    []
-  SSH (SSHCommunicator user pty timeout) -> [
-      "ssh_username" .= user
-    , "ssh_pty" .= pty
-    , "ssh_timeout" .= (show timeout <> "m")
-    ]
-  WinRm ->
-    []
-
-
-fromVariable :: Variable -> A.Pair
-fromVariable (Variable k v) =
-  k .= v
-
-fromProvisioner :: Provisioner -> Value
-fromProvisioner p =
-  A.object $ join [
-      ["type" .= provisionerType p]
-    , Map.foldrWithKey (\k v xs -> (k .= v : xs)) [] (provisionerOptions p)
-    , "only" .=? list (provisionerOnly p)
-    , "except" .=? list (provisionerExcept p)
-    , "pause_before" .=? (provisionerPauseBefore p)
-    , "timeout" .=? (provisionerTimeout p)
---    , "override" .=?
-    ]
-
-fromPostProcessor :: PostProcessor -> Value
-fromPostProcessor _ =
-  A.object $ join [
-    ]
 
 listToObject :: [A.Pair] -> Value
 listToObject xs =

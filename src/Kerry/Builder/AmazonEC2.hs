@@ -29,6 +29,7 @@ import           Data.Aeson ((.=))
 import qualified Data.Aeson.Types as Aeson
 
 import           Kerry.Prelude
+import           Kerry.Serial
 
 ------------------------------------------
 -- Builders
@@ -36,22 +37,25 @@ import           Kerry.Prelude
 data Credentials =
     AWSProfile Text
   | EnvironmentVariables
+    deriving (Eq, Show)
 
 data AWSVariables t =
   AWSVariables {
       awsRegion :: Text
     , awsCredentials :: Credentials
     , awsType :: t
-    }
+    } deriving (Eq, Show)
 
 data AWSAmiOwner =
     Accounts [Text]
   | Self
   | Alias Text
+    deriving (Eq, Show)
 
 data SourceAmi =
     SourceAmiId Text
   | SourceAmiFilter (Map Text Text) AWSAmiOwner Bool
+    deriving (Eq, Show)
 
 data SourceAmiFilterKey =
     -- | The image architecture (i386 | x86_64).
@@ -116,6 +120,7 @@ data SourceAmiFilterKey =
   | TagKey
   -- | The virtualization type (paravirtual | hvm).
   | VirtualizationType
+    deriving (Eq, Show)
 
 {--
 renderSourceAmiFilterKey :: SourceAmiFilterKey -> Text
@@ -171,7 +176,7 @@ data BlockDeviceMapping =
     , blockDeviceMappingSnapshotId :: Maybe Text
     , blockDeviceMappingVirtualName :: Maybe Text -- prefixed with 'ephemeral' for
     , blockDeviceMappingNoDevice :: Maybe Bool
-    }
+    } deriving (Eq, Show)
 
 blockDeviceMapping :: Text -> Text -> Int -> Bool -> BlockDeviceMapping
 blockDeviceMapping name vtype vsize delete =
@@ -211,7 +216,7 @@ data EBS =
     -- ami_users
     -- ami_regions
 
-    , ebsRegion :: Text -- ^ region
+    , ebsRegion :: Maybe Text -- ^ region
     , ebsS3Bucket :: Maybe Text -- ^ s3_bucket
     -- TODO x509_cert_path
     -- TODO x509_key_path
@@ -221,26 +226,28 @@ data EBS =
     -- encrypt_boot
     -- kms_key_id
 
-    , ebsVpcId :: Text -- ^ vpc_id
+    , ebsVpcId :: Maybe Text -- ^ vpc_id
     -- TODO vpc_filter - https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html
-    , ebsSubnetId :: Text -- ^ subnet_id
+    , ebsSubnetId :: Maybe Text -- ^ subnet_id
     -- TODO subnet_filter - https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html
     -- temporary_security_group_source_cidrs
 
-    , ebsAssociatePublicIpAddress :: Bool -- ^ associate_public_ip_address
+    , ebsAssociatePublicIpAddress :: Maybe Bool -- ^ associate_public_ip_address
     , ebsIAMInstanceProfile :: Maybe Text -- ^ iam_instance_profile
     , ebsInsecureSkipTLSVerify :: Maybe Bool -- ^ insecure_skip_tls_verify
 
     , ebsRunTags :: Map Text Text -- ^ run_tags
     , ebsTags :: Map Text Text -- ^ tags
-    }
+    } deriving (Eq, Show)
 
 fromEBS :: EBS -> [Aeson.Pair]
-fromEBS ebs = [
-    "ami_name" .= ebsAmiName ebs
-  , fromSourceAmi $ ebsSourceAmi ebs
-  , "instance_type" .= ebsInstanceType ebs
---  , "account_id" .=? ebsAccountId ebs
+fromEBS ebs = join [
+    ["ami_name" .= ebsAmiName ebs]
+  , [fromSourceAmi $ ebsSourceAmi ebs]
+  , ["instance_type" .= ebsInstanceType ebs]
+  , "account_id" .=? ebsAccountId ebs
+  , "region" .=? ebsRegion ebs
+  , "s3_bucket" .=? ebsS3Bucket ebs
   ]
 
 

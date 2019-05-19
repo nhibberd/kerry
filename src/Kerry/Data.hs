@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Kerry.Data (
+  -- * Data
     Variable(..)
   , Builder(..)
   , BuilderType(..)
@@ -12,38 +13,56 @@ module Kerry.Data (
   , Communicator(..)
   , SSHCommunicator(..)
   , defaultSSHCommunicator
+
+  -- * Serialization
+  , fromPacker
+  , fromBuilder
+  , fromBuilderType
+  , fromVariable
+  , fromProvisioner
+  , fromPostProcessor
   ) where
 
-import           Kerry.Prelude
+import           Data.Aeson (Value, (.=))
+import qualified Data.Aeson as A
+import qualified Data.Aeson.Types as A
+import qualified Data.Map.Strict as Map
 
+import           Kerry.Prelude
 import qualified Kerry.Builder.AmazonEC2 as AmazonEC2
+import           Kerry.Serial
 
 data Variable =
-  Variable Text Text
+    Variable Text Text
+    deriving (Eq, Show)
 
 -- This type variable is wrong
 data Builder =
   Builder {
       builderType :: BuilderType
+    , builderName :: Maybe Text
     , builderCommunicator :: Communicator
-    }
+    } deriving (Eq, Show)
 
 data BuilderType =
-  AmazonEBSBuilder AmazonEC2.EBS
+    AmazonEBSBuilder AmazonEC2.EBS
+    deriving (Eq, Show)
 
 data Provisioner =
   Provisioner {
       provisionerType :: Text
+      -- options not expressive enough
     , provisionerOptions :: Map Text Text
     , provisionerOnly :: [Text]
     , provisionerExcept :: [Text]
     , provisionerPauseBefore :: Maybe Text
     , provisionerTimeout :: Maybe Text
     , provisionerOverride :: Map Text (Map Text Text)
-    }
+    } deriving (Eq, Show)
 
 data PostProcessor =
   PostProcessor
+  deriving (Eq, Show)
 
 -- This type variable is wrong
 data Packer =
@@ -52,7 +71,7 @@ data Packer =
     , builders :: [Builder]
     , provisioners :: [Provisioner]
     , postProcessors :: [PostProcessor]
-    }
+    } deriving (Eq, Show)
 
 
 -- https://www.packer.io/docs/templates/communicator.html
@@ -60,6 +79,7 @@ data Communicator =
     None
   | SSH SSHCommunicator
   | WinRm
+    deriving (Eq, Show)
 
 
 -- https://www.packer.io/docs/templates/communicator.html#ssh
@@ -89,7 +109,7 @@ data SSHCommunicator =
 -- 'ssh_proxy_port' (number) - A port of the SOCKS proxy. Defaults to 1080.
 -- 'ssh_proxy_username' (string) - The username to authenticate with the proxy server. Optional.
 -- 'ssh_read_write_timeout' (string) - The amount of time to wait for a remote command to end. This might be useful if, for example, packer hangs on a connection after a reboot. Example: 5m. Disabled by default.
-    }
+    } deriving (Eq, Show)
 
 defaultSSHCommunicator :: Text -> SSHCommunicator
 defaultSSHCommunicator username =
@@ -98,3 +118,65 @@ defaultSSHCommunicator username =
     , sshPty = True
     , sshTimeout = 10
     }
+
+
+
+----
+
+
+-- This type variable is wrong
+fromPacker :: Packer -> Value
+fromPacker p =
+  A.object $ join [
+      "variables" .=? (listToObject <$> list (fromVariable <$> variables p))
+    , "builders" .=? list (fromBuilder <$> builders p)
+    , "provisioners" .=? list (fromProvisioner <$> provisioners p)
+    , "post-processors" .=? list (fromPostProcessor <$> postProcessors p)
+    ]
+
+fromBuilder :: Builder -> Value
+fromBuilder (Builder btype name comm) =
+  A.object $ join [
+      fromBuilderType btype
+    , "name" .=? name
+    , fromCommunicator comm
+    ]
+
+fromBuilderType :: BuilderType -> [A.Pair]
+fromBuilderType = \case
+  AmazonEBSBuilder ebs ->
+    "type" .= t "amazon-ebs" : AmazonEC2.fromEBS ebs
+
+fromCommunicator :: Communicator -> [A.Pair]
+fromCommunicator = \case
+  None ->
+    []
+  SSH (SSHCommunicator user pty timeout) -> [
+      "ssh_username" .= user
+    , "ssh_pty" .= pty
+    , "ssh_timeout" .= (show timeout <> "m")
+    ]
+  WinRm ->
+    []
+
+
+fromVariable :: Variable -> A.Pair
+fromVariable (Variable k v) =
+  k .= v
+
+fromProvisioner :: Provisioner -> Value
+fromProvisioner p =
+  A.object $ join [
+      ["type" .= provisionerType p]
+    , Map.foldrWithKey (\k v xs -> (k .= v : xs)) [] (provisionerOptions p)
+    , "only" .=? list (provisionerOnly p)
+    , "except" .=? list (provisionerExcept p)
+    , "pause_before" .=? (provisionerPauseBefore p)
+    , "timeout" .=? (provisionerTimeout p)
+--    , "override" .=?
+    ]
+
+fromPostProcessor :: PostProcessor -> Value
+fromPostProcessor _ =
+  A.object $ join [
+    ]
