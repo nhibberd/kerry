@@ -1,5 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Kerry.Builder.AmazonEC2 (
   -- * General
@@ -16,11 +18,15 @@ module Kerry.Builder.AmazonEC2 (
   -- * Builders
   -- ** EBS Backed
   , EBS (..)
+  , fromEBS
 
   -- * Instance-store
   , Instance (..)
 
   ) where
+
+import           Data.Aeson ((.=))
+import qualified Data.Aeson.Types as Aeson
 
 import           Kerry.Prelude
 
@@ -194,15 +200,18 @@ blockDeviceMapping name vtype vsize delete =
 --
 data EBS =
   EBS {
-      ebsAccountId :: Text -- ^ account_id
-    , ebsAmiName :: Text -- ^ ami_name
+  -- Required
+      ebsAmiName :: Text -- ^ ami_name
+    , ebsSourceAmi :: SourceAmi -- ^ source_ami
+    , ebsInstanceType :: Text -- ^ instance_type
+
+  -- Optional
+    , ebsAccountId :: Maybe Text -- ^ account_id
     -- ami_description
     -- ami_users
     -- ami_regions
 
-    , ebsInstanceType :: Text -- ^ instance_type
     , ebsRegion :: Text -- ^ region
-    , ebsSourceAmi :: SourceAmi -- ^ source_ami
     , ebsS3Bucket :: Maybe Text -- ^ s3_bucket
     -- TODO x509_cert_path
     -- TODO x509_key_path
@@ -224,9 +233,24 @@ data EBS =
 
     , ebsRunTags :: Map Text Text -- ^ run_tags
     , ebsTags :: Map Text Text -- ^ tags
-
-
     }
+
+fromEBS :: EBS -> [Aeson.Pair]
+fromEBS ebs = [
+    "ami_name" .= ebsAmiName ebs
+  , fromSourceAmi $ ebsSourceAmi ebs
+  , "instance_type" .= ebsInstanceType ebs
+--  , "account_id" .=? ebsAccountId ebs
+  ]
+
+
+fromSourceAmi :: SourceAmi -> Aeson.Pair
+fromSourceAmi = \case
+  SourceAmiId x ->
+    "source_ami" .= x
+  SourceAmiFilter _ _ _ ->
+    "no_idea" .= ("no_idea" :: Text)
+
 
 -- amazon-instance
 

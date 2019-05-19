@@ -59,16 +59,7 @@ fromBuilder (Builder btype comm) =
 fromBuilderType :: BuilderType -> [A.Pair]
 fromBuilderType = \case
   AmazonEBSBuilder ebs ->
-    -- TODO this should live somewhere else
-    "type" .= t "amazon-ebs" : [
-      "ami_name" .= AmazonEC2.ebsAmiName ebs
-    , case AmazonEC2.ebsSourceAmi ebs of
-        AmazonEC2.SourceAmiId x ->
-          "source_ami" .= x
-        AmazonEC2.SourceAmiFilter _ _ _ ->
-          "no_idea" .= t "no_idea"
-    , "instance_type" .= AmazonEC2.ebsInstanceType ebs
-    ]
+    "type" .= t "amazon-ebs" : AmazonEC2.fromEBS ebs
 
 fromCommunicator :: Communicator -> [A.Pair]
 fromCommunicator = \case

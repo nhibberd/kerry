@@ -32,11 +32,11 @@ ssh =
 ebs :: EBS
 ebs =
   EBS {
-      ebsAccountId = "test"
-    , ebsAmiName = "test"
-    , ebsInstanceType = "m4.xlarge"
-    , ebsRegion = "us-west-2"
+      ebsAmiName = "test"
     , ebsSourceAmi = SourceAmiId "ami-fred"
+    , ebsInstanceType = "m4.xlarge"
+    , ebsAccountId = Nothing
+    , ebsRegion = "us-west-2"
     , ebsS3Bucket = Nothing
     , ebsLaunchBlockDeviceMappings = [
           blockDeviceMapping "/dev/xvda" "gp2" 200 True
