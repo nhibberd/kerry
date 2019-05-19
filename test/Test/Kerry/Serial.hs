@@ -9,13 +9,9 @@ import           Control.Monad.Morph (hoist)
 import           Control.Monad.Trans.Resource (runResourceT)
 import           Control.Monad.IO.Class (liftIO)
 
---import qualified Data.Aeson as Aeson
---import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Char8 as Char8
 
 import           Hedgehog
---import qualified Hedgehog.Gen as Gen
---import qualified Hedgehog.Range as Range
 
 import           Kerry.Prelude
 import           Kerry.Example (example)
@@ -30,10 +26,7 @@ import qualified System.Process as Process
 prop_example :: Property
 prop_example =
   withTests 1 . property . hoist runResourceT $ do
-    (_release, path, handle) <- Temp.openTempFile (Just "/tmp/nick") "example.json"
---    let
---      path = "/tmp/nick/fred.json"
---    handle <- liftIO $ IO.openFile path IO.WriteMode
+    (_release, path, handle) <- Temp.openTempFile Nothing "example.json"
     let
       raw = asByteStringWith (fromPacker) example
     annotate $ show raw
