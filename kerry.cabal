@@ -58,7 +58,7 @@ library
     src
 
   exposed-modules:
-    Kerry.Builders.AmazonEC2
+    Kerry.Builder.AmazonEC2
     Kerry.Data
     Kerry.Functions
     Kerry.Example

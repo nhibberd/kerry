@@ -65,6 +65,8 @@ fromBuilderType = \case
     , case AmazonEC2.ebsSourceAmi ebs of
         AmazonEC2.SourceAmiId x ->
           "source_ami" .= x
+        AmazonEC2.SourceAmiFilter _ _ _ ->
+          "no_idea" .= t "no_idea"
     , "instance_type" .= AmazonEC2.ebsInstanceType ebs
     ]
 
