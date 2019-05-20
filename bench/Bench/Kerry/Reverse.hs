@@ -6,7 +6,7 @@ module Bench.Kerry.Reverse (
 
 import           Gauge.Main (Benchmark, bgroup, bench, whnf)
 
-import           Kerry.Prelude
+import           Kerry.Internal.Prelude
 import           Kerry.Reverse (reverse)
 
 reverse2 :: Int -> Int

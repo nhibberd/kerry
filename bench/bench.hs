@@ -4,7 +4,7 @@ import qualified Bench.Kerry.Reverse
 
 import           Gauge.Main (defaultMain)
 
-import           Kerry.Prelude
+import           Kerry.Internal.Prelude
 
 
 main :: IO ()

@@ -2,7 +2,7 @@
 
 import           Control.Monad (when)
 
-import           Kerry.Prelude
+import           Kerry.Internal.Prelude
 
 import           System.Exit (exitFailure)
 

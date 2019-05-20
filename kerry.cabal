@@ -61,11 +61,13 @@ library
 
   exposed-modules:
     Kerry
+
     Kerry.Builder.AmazonEC2
     Kerry.Data
-    Kerry.Functions
-    Kerry.Prelude
-    Kerry.Serial
+    Kerry.Engine
+
+    Kerry.Internal.Prelude
+    Kerry.Internal.Serial
 
   other-modules:
     Kerry.Example

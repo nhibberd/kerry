@@ -43,9 +43,9 @@ import qualified Data.Aeson as A
 import qualified Data.Aeson.Types as A
 import qualified Data.Map.Strict as Map
 
-import           Kerry.Prelude
 import qualified Kerry.Builder.AmazonEC2 as AmazonEC2
-import           Kerry.Serial (list, (.=?), t, listToObject, prettyAsTextWith)
+import           Kerry.Internal.Prelude
+import           Kerry.Internal.Serial (list, listToObject, prettyAsTextWith, t, (.=?))
 
 data UserVariable =
   UserVariable Text Text

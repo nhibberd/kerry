@@ -11,7 +11,7 @@ import qualified System.IO as IO
 import qualified System.Exit as Exit
 
 import           Kerry.Command.Reverse
-import           Kerry.Prelude
+import           Kerry.Internal.Prelude
 
 
 main :: IO ()

@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
-module Kerry.Serial (
+module Kerry.Internal.Serial (
     list
   , listToObject
   , t
@@ -27,7 +27,7 @@ import qualified Data.ByteString.Lazy as Lazy
 import           Data.Text (Text)
 import qualified Data.Text.Encoding as T
 
-import           Kerry.Prelude
+import           Kerry.Internal.Prelude
 
 listToObject :: [A.Pair] -> Value
 listToObject xs =

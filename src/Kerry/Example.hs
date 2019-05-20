@@ -8,16 +8,18 @@ module Kerry.Example (
 
 import qualified Data.Map as Map
 
-import qualified Kerry.Functions as F
-import           Kerry.Data
 import           Kerry.Builder.AmazonEC2
+import           Kerry.Data
+import qualified Kerry.Engine as F
 
-import           Kerry.Prelude
+import           Kerry.Internal.Prelude
 
 example :: Packer
 example =
   Packer {
-      variables = []
+      variables = [
+          UserVariable "name" "example-packer"
+        ]
     , builders = [
           Builder (AmazonEBSBuilder $ aws ebs) Nothing ssh
         ]

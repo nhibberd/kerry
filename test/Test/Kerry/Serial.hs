@@ -5,21 +5,21 @@ module Test.Kerry.Serial (
     tests
   ) where
 
+import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Morph (hoist)
 import           Control.Monad.Trans.Resource (runResourceT)
-import           Control.Monad.IO.Class (liftIO)
 
 import qualified Data.ByteString.Char8 as Char8
 
 import           Hedgehog
 
-import           Kerry.Prelude
 import           Kerry.Data (Packer, fromPacker)
-import           Kerry.Serial (prettyAsByteStringWith)
+import           Kerry.Internal.Prelude
+import           Kerry.Internal.Serial (prettyAsByteStringWith)
 
 import           System.Exit (ExitCode (..))
-import qualified System.IO.Temp as Temp
 import qualified System.IO as IO
+import qualified System.IO.Temp as Temp
 import qualified System.Process as Process
 
 import qualified Test.Kerry.Gen as Gen

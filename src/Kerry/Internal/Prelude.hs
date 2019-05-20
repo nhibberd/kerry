@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Kerry.Prelude (
+module Kerry.Internal.Prelude (
     module X
   , hoistEither
   , hoistMaybe

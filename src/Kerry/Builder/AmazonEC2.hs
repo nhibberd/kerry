@@ -28,8 +28,8 @@ import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Types as Aeson
 import qualified Data.Map as Map
 
-import           Kerry.Prelude
-import           Kerry.Serial
+import           Kerry.Internal.Prelude
+import           Kerry.Internal.Serial
 
 data Credentials =
     AWSProfile Text

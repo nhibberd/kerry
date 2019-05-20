@@ -5,7 +5,7 @@
 -- | All strings within templates are processed by a common Packer
 -- templating engine, where variables and functions can be used to
 -- modify the value of a configuration parameter at runtime.
-module Kerry.Functions (
+module Kerry.Engine (
     Template (..)
   , RawTemplate
   , toTemplate
@@ -36,7 +36,7 @@ module Kerry.Functions (
 
 import qualified Data.Text as T
 
-import           Kerry.Prelude
+import           Kerry.Internal.Prelude
 
 newtype Template =
   Template {
