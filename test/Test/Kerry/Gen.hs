@@ -19,9 +19,9 @@ import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
 import           Kerry.Builder.AmazonEC2
+import           Kerry.Packer
 import           Kerry.Provisioner.File
 import           Kerry.Provisioner.Shell
-import           Kerry.Data
 import           Kerry.Internal.Prelude
 
 

@@ -13,9 +13,9 @@ import qualified Data.ByteString.Char8 as Char8
 
 import           Hedgehog
 
-import           Kerry.Data (Packer, fromPacker)
 import           Kerry.Internal.Prelude
 import           Kerry.Internal.Serial (prettyAsByteStringWith)
+import           Kerry.Packer (Packer, fromPacker)
 
 import           System.Exit (ExitCode (..))
 import qualified System.IO as IO

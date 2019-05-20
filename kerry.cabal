@@ -62,8 +62,8 @@ library
   exposed-modules:
     Kerry
 
-    Kerry.Data
     Kerry.Engine
+    Kerry.Packer
 
     Kerry.Builder.AmazonEC2
 

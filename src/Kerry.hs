@@ -19,9 +19,9 @@ module Kerry (
   ) where
 
 
-import           Kerry.Data (Packer(..), renderPacker)
-import           Kerry.Data (UserVariable(..))
-import           Kerry.Data (Builder(..), BuilderType(..))
-import           Kerry.Data (Communicator(..), defaultSSHCommunicator)
-import           Kerry.Data (Provisioner(..), ProvisionerType(..), provisioner)
-import           Kerry.Data (PostProcessor(..))
+import           Kerry.Packer (Packer(..), renderPacker)
+import           Kerry.Packer (UserVariable(..))
+import           Kerry.Packer (Builder(..), BuilderType(..))
+import           Kerry.Packer (Communicator(..), defaultSSHCommunicator)
+import           Kerry.Packer (Provisioner(..), ProvisionerType(..), provisioner)
+import           Kerry.Packer (PostProcessor(..))

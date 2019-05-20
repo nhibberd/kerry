@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Kerry.Data (
+module Kerry.Packer (
   -- * Core data types
 
   -- ** Packer
