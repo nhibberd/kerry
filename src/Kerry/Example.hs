@@ -9,6 +9,13 @@ module Kerry.Example (
 import qualified Data.Map as Map
 
 import           Kerry
+import           Kerry.Builder.AmazonEC2 (AWS(..), Credentials(..))
+import           Kerry.Builder.AmazonEC2 (SourceAmi(..))
+import           Kerry.Builder.AmazonEC2 (blockDeviceMapping)
+import           Kerry.Builder.AmazonEC2 (EBS(..))
+
+import           Kerry.Provisioner.Shell (ShellType(..), shell)
+
 import qualified Kerry.Engine as F
 
 import           Kerry.Internal.Prelude
@@ -22,7 +29,9 @@ example =
     , builders = [
           Builder (AmazonEBSBuilder $ aws builder) Nothing ssh
         ]
-    , provisioners = []
+    , provisioners = [
+          shellProvisioner
+        ]
     , postProcessors = []
     }
 
@@ -63,3 +72,9 @@ builder =
         ]
     , ebsVpcId = Nothing
     }
+
+
+shellProvisioner :: Provisioner
+shellProvisioner =
+  provisioner . ShellProvisioner . shell $
+    Inline ["echo foo"]

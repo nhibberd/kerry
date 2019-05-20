@@ -339,7 +339,8 @@ ebs name sourceami instancetype =
 -- | EBS serialization
 fromEBS :: EBS -> [Aeson.Pair]
 fromEBS e = join [
-    ["ami_name" .= ebsAmiName e]
+    ["type" .= t "amazon-ebs"]
+  , ["ami_name" .= ebsAmiName e]
   , [fromSourceAmi $ ebsSourceAmi e]
   , ["instance_type" .= ebsInstanceType e]
   , "ami_description" .=? ebsAmiDescription e
@@ -388,8 +389,3 @@ fromBlockDeviceMapping b =
     , "virtual_name" .=? blockDeviceMappingVirtualName b
     , "no_device" .=? blockDeviceMappingNoDevice b
     ]
-
-fromMap :: Map Text Text -> Aeson.Value
-fromMap m =
-  Aeson.object . flip fmap (Map.toList m) $ \(k, v) ->
-    k .= v

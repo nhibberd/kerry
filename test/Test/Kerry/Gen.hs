@@ -11,7 +11,6 @@ module Test.Kerry.Gen (
   ) where
 
 import qualified Data.List as List
-import qualified Data.Map as Map
 import qualified Data.Text as T
 
 import           Hedgehog
@@ -20,6 +19,8 @@ import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
 import           Kerry.Builder.AmazonEC2
+import           Kerry.Provisioner.File
+import           Kerry.Provisioner.Shell
 import           Kerry.Data
 import           Kerry.Internal.Prelude
 
@@ -48,8 +49,8 @@ genBuilder :: Gen (Int -> Builder)
 genBuilder = do
   comm <- SSH <$> genSSHCommunicator
   name <- Gen.maybe $ Gen.element Corpus.agile
-  ebs <- genEBSBuilder
-  aws <- genAWS ebs
+  ebsb <- genEBSBuilder
+  aws <- genAWS ebsb
   pure $ \index ->
     Builder
       (AmazonEBSBuilder aws)
@@ -108,23 +109,38 @@ genSSHCommunicator =
 
 genProvisioner :: Gen Provisioner
 genProvisioner =
-  Gen.choice [
-      genShellLocalProvisioner
-    ]
-
-genShellLocalProvisioner :: Gen Provisioner
-genShellLocalProvisioner =
   Provisioner
-    <$> pure "shell-local"
-    <*> (Gen.element [
-        Map.fromList [("command", "echo foo")]
-      ])
+    <$> genProvisionerType
     <*> pure []
     <*> pure []
     <*> pure Nothing
     <*> pure Nothing
     <*> pure mempty
 
+genProvisionerType :: Gen ProvisionerType
+genProvisionerType =
+  Gen.choice [
+      ShellProvisioner <$> genShell
+    , FileProvisioner <$> genFile
+    ]
+
+genShell :: Gen Shell
+genShell = do
+  stype <- Gen.element [
+      Inline ["echo foo"]
+-- TODO files must exist during validation
+--    , Script "run.sh"
+--    , Scripts ["run.sh", "run2.sh"]
+    ]
+  pure $ shell stype
+
+genFile :: Gen File
+genFile =
+  File
+    <$> pure "/dev/null"
+    <*> pure "/tmp"
+    <*> Gen.element [FileUpload, FileDownload]
+    <*> Gen.maybe Gen.bool
 
 genPostProcessor :: Gen PostProcessor
 genPostProcessor =

@@ -17,6 +17,9 @@ module Kerry.Data (
 
   -- *** Provisioners
   , Provisioner(..)
+  , provisioner
+
+  , ProvisionerType(..)
 
   -- *** PostProcessors
   , PostProcessor(..)
@@ -38,14 +41,17 @@ module Kerry.Data (
   , fromPostProcessor
   ) where
 
-import           Data.Aeson (Value, (.=))
+import           Data.Aeson ((.=))
 import qualified Data.Aeson as A
 import qualified Data.Aeson.Types as A
-import qualified Data.Map.Strict as Map
 
 import qualified Kerry.Builder.AmazonEC2 as AmazonEC2
+
+import qualified Kerry.Provisioner.File as File
+import qualified Kerry.Provisioner.Shell as Shell
+
 import           Kerry.Internal.Prelude
-import           Kerry.Internal.Serial (list, listToObject, prettyAsTextWith, t, (.=?))
+import           Kerry.Internal.Serial (list, listToObject, prettyAsTextWith, (.=?), fromMapWith, fromMap)
 
 data UserVariable =
   UserVariable Text Text
@@ -65,6 +71,7 @@ data Builder =
     , builderCommunicator :: Communicator
     } deriving (Eq, Show)
 
+-- | Concrete 'BuilderType'
 data BuilderType =
     AmazonEBSBuilder (AmazonEC2.AWS AmazonEC2.EBS)
     deriving (Eq, Show)
@@ -78,15 +85,31 @@ data BuilderType =
 --
 data Provisioner =
   Provisioner {
-      provisionerType :: Text
-      -- options not expressive enough
-    , provisionerOptions :: Map Text Text
+      provisionerType :: ProvisionerType
     , provisionerOnly :: [Text]
     , provisionerExcept :: [Text]
     , provisionerPauseBefore :: Maybe Text
     , provisionerTimeout :: Maybe Text
-    , provisionerOverride :: Map Text (Map Text Text)
+    , provisionerOverride :: Maybe (Map Text (Map Text Text))
     } deriving (Eq, Show)
+
+-- | Basic 'Provisioner'
+provisioner :: ProvisionerType -> Provisioner
+provisioner pt =
+  Provisioner {
+      provisionerType = pt
+    , provisionerOnly = []
+    , provisionerExcept = []
+    , provisionerPauseBefore = Nothing
+    , provisionerTimeout = Nothing
+    , provisionerOverride = Nothing
+    }
+
+-- | Concrete 'ProvisionerType'
+data ProvisionerType =
+    ShellProvisioner Shell.Shell
+  | FileProvisioner File.File
+    deriving (Eq, Show)
 
 data PostProcessor =
   PostProcessor
@@ -173,7 +196,7 @@ renderPacker =
   prettyAsTextWith fromPacker
 
 -- | Packer serialization
-fromPacker :: Packer -> Value
+fromPacker :: Packer -> A.Value
 fromPacker p =
   A.object $ join [
       "variables" .=? (listToObject <$> list (fromUserVariable <$> variables p))
@@ -183,7 +206,7 @@ fromPacker p =
     ]
 
 -- | Builder serialization
-fromBuilder :: Builder -> Value
+fromBuilder :: Builder -> A.Value
 fromBuilder (Builder btype name comm) =
   A.object $ join [
       fromBuilderType btype
@@ -195,7 +218,7 @@ fromBuilder (Builder btype name comm) =
 fromBuilderType :: BuilderType -> [A.Pair]
 fromBuilderType = \case
   AmazonEBSBuilder aws ->
-    "type" .= t "amazon-ebs" : AmazonEC2.fromAWS AmazonEC2.fromEBS aws
+    AmazonEC2.fromAWS AmazonEC2.fromEBS aws
 
 -- | Communicator serialization
 fromCommunicator :: Communicator -> [A.Pair]
@@ -216,20 +239,28 @@ fromUserVariable (UserVariable k v) =
   k .= v
 
 -- | Provisioner serialization
-fromProvisioner :: Provisioner -> Value
+fromProvisioner :: Provisioner -> A.Value
 fromProvisioner p =
   A.object $ join [
-      ["type" .= provisionerType p]
-    , Map.foldrWithKey (\k v xs -> (k .= v : xs)) [] (provisionerOptions p)
+      fromProvisionerType (provisionerType p)
     , "only" .=? list (provisionerOnly p)
     , "except" .=? list (provisionerExcept p)
     , "pause_before" .=? (provisionerPauseBefore p)
     , "timeout" .=? (provisionerTimeout p)
---    , "override" .=?
+    , "override" .=? (fromMapWith fromMap <$> provisionerOverride p)
     ]
 
+fromProvisionerType :: ProvisionerType -> [A.Pair]
+fromProvisionerType = \case
+  ShellProvisioner shell ->
+    Shell.fromShell shell
+
+  FileProvisioner file ->
+    File.fromFile file
+
+
 -- | PostProcessor serialization
-fromPostProcessor :: PostProcessor -> Value
+fromPostProcessor :: PostProcessor -> A.Value
 fromPostProcessor _ =
   A.object $ join [
     ]

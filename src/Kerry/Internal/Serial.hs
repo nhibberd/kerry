@@ -6,8 +6,10 @@
 module Kerry.Internal.Serial (
     list
   , listToObject
-  , t
   , (.=?)
+  , fromMap
+  , fromMapWith
+  , t
 
   , asTextWith
   , asByteStringWith
@@ -26,6 +28,7 @@ import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as Lazy
 import           Data.Text (Text)
 import qualified Data.Text.Encoding as T
+import qualified Data.Map as Map
 
 import           Kerry.Internal.Prelude
 
@@ -44,6 +47,16 @@ list l =
 (.=?) :: A.ToJSON a => Text -> Maybe a -> [(Text, Value)]
 (.=?) k =
   maybe [] (\x -> [k .= x])
+
+fromMap :: Map Text Text -> Aeson.Value
+fromMap m =
+  Aeson.object . flip fmap (Map.toList m) $ \(k, v) ->
+    k .= v
+
+fromMapWith :: (a -> Aeson.Value) -> Map Text a -> Aeson.Value
+fromMapWith f m =
+  Aeson.object . flip fmap (Map.toList m) $ \(k, v) ->
+    k .= (f v)
 
 t :: Text -> Text
 t =
