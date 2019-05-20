@@ -19,7 +19,7 @@ example =
   Packer {
       variables = []
     , builders = [
-          Builder (AmazonEBSBuilder ebs) Nothing ssh
+          Builder (AmazonEBSBuilder $ aws ebs) Nothing ssh
         ]
     , provisioners = []
     , postProcessors = []
@@ -29,28 +29,36 @@ ssh :: Communicator
 ssh =
   SSH $ defaultSSHCommunicator "ec2-user"
 
+aws :: a -> AWS a
+aws builder =
+  AWS {
+      awsRegion = "us-west-2"
+    , awsCredentials = EnvironmentVariables
+    , awsBuilder = builder
+    }
+
 ebs :: EBS
 ebs =
   EBS {
       ebsAmiName = "test"
     , ebsSourceAmi = SourceAmiId "ami-fred"
     , ebsInstanceType = "m4.xlarge"
-    , ebsAccountId = Nothing
-    , ebsRegion = Just "us-west-2"
-    , ebsS3Bucket = Nothing
+    , ebsAmiDescription = Nothing
+    , ebsAmiRegions = Nothing
+    , ebsAmiUsers = Nothing
+    , ebsAssociatePublicIpAddress = Just True
+    , ebsAvailabilityZone = Nothing
+    , ebsIAMInstanceProfile = Just "iam-fred"
+    , ebsInsecureSkipTLSVerify = Nothing
     , ebsLaunchBlockDeviceMappings = [
           blockDeviceMapping "/dev/xvda" "gp2" 200 True
         ]
-
-    , ebsVpcId = Nothing
-    , ebsSubnetId = Nothing
-    , ebsAssociatePublicIpAddress = Just True
-    , ebsIAMInstanceProfile = Just "iam-fred"
-    , ebsInsecureSkipTLSVerify = Nothing
     , ebsRunTags = Map.fromList [
           ("name", F.renderRawTemplate $ F.user "name")
         ]
+    , ebsSubnetId = Nothing
     , ebsTags = Map.fromList [
           ("created", F.renderRawTemplate F.timestamp)
         ]
+    , ebsVpcId = Nothing
     }

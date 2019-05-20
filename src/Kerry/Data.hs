@@ -3,23 +3,37 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Kerry.Data (
-  -- * Data
-    Variable(..)
+  -- * Core data types
+
+  -- ** Packer
+    Packer(..)
+
+  -- *** User variables
+  , UserVariable(..)
+
+  -- *** Builders
   , Builder(..)
   , BuilderType(..)
-  , Provisioner(..)
-  , PostProcessor(..)
-  , Packer(..)
 
+  -- *** Provisioners
+  , Provisioner(..)
+
+  -- *** PostProcessors
+  , PostProcessor(..)
+
+  -- *** Communicators
   , Communicator(..)
   , SSHCommunicator(..)
   , defaultSSHCommunicator
+
+  -- * Render
+  , renderPacker
 
   -- * Serialization
   , fromPacker
   , fromBuilder
   , fromBuilderType
-  , fromVariable
+  , fromUserVariable
   , fromProvisioner
   , fromPostProcessor
   ) where
@@ -31,13 +45,19 @@ import qualified Data.Map.Strict as Map
 
 import           Kerry.Prelude
 import qualified Kerry.Builder.AmazonEC2 as AmazonEC2
-import           Kerry.Serial
+import           Kerry.Serial (list, (.=?), t, listToObject, prettyAsTextWith)
 
-data Variable =
-    Variable Text Text
+data UserVariable =
+  UserVariable Text Text
     deriving (Eq, Show)
 
--- This type variable is wrong
+-- |
+-- Builders
+--
+-- See the following for more information
+--   - https://www.packer.io/docs/templates/builders.html
+--   - https://www.packer.io/docs/builders/index.html
+--
 data Builder =
   Builder {
       builderType :: BuilderType
@@ -46,9 +66,16 @@ data Builder =
     } deriving (Eq, Show)
 
 data BuilderType =
-    AmazonEBSBuilder AmazonEC2.EBS
+    AmazonEBSBuilder (AmazonEC2.AWS AmazonEC2.EBS)
     deriving (Eq, Show)
 
+-- |
+-- Provisioner
+--
+-- See the following for more information:
+--   - https://www.packer.io/docs/templates/provisioners.html
+--   - https://www.packer.io/docs/provisioners/index.html
+--
 data Provisioner =
   Provisioner {
       provisionerType :: Text
@@ -65,25 +92,41 @@ data PostProcessor =
   PostProcessor
   deriving (Eq, Show)
 
--- This type variable is wrong
+-- |
+-- Packer
+--
+-- A concrete representation for configuring the various components of Packer.
+--
 data Packer =
   Packer {
-      variables :: [Variable]
+      variables :: [UserVariable]
     , builders :: [Builder]
     , provisioners :: [Provisioner]
     , postProcessors :: [PostProcessor]
     } deriving (Eq, Show)
 
-
--- https://www.packer.io/docs/templates/communicator.html
+-- |
+-- Communicator
+--
+-- See the following for more information:
+--   - https://www.packer.io/docs/templates/communicator.html
+--   - https://www.packer.io/docs/provisioners/index.html
+--
 data Communicator =
+  -- | No communicator will be used. If this is set, most provisioners also can't be used.
     None
+  -- | An SSH connection will be established to the machine. This is usually the default.
   | SSH SSHCommunicator
+  -- | A WinRM connection will be established.
   | WinRm
     deriving (Eq, Show)
 
 
+-- |
+-- 'ssh' communicator
+--
 -- https://www.packer.io/docs/templates/communicator.html#ssh
+--
 data SSHCommunicator =
   SSHCommunicator {
       sshUsername :: Text -- ^ 'ssh_username' - The username to connect to SSH with. Required if using SSH.
@@ -112,6 +155,10 @@ data SSHCommunicator =
 -- 'ssh_read_write_timeout' (string) - The amount of time to wait for a remote command to end. This might be useful if, for example, packer hangs on a connection after a reboot. Example: 5m. Disabled by default.
     } deriving (Eq, Show)
 
+-- |
+-- A minimal default @ssh@ communicator where only the @username@
+-- needs to be specified
+--
 defaultSSHCommunicator :: Text -> SSHCommunicator
 defaultSSHCommunicator username =
   SSHCommunicator {
@@ -120,21 +167,22 @@ defaultSSHCommunicator username =
     , sshTimeout = 10
     }
 
+-- | Render an 'Packer' to 'Text'
+renderPacker :: Packer -> Text
+renderPacker =
+  prettyAsTextWith fromPacker
 
-
-----
-
-
--- This type variable is wrong
+-- | Packer serialization
 fromPacker :: Packer -> Value
 fromPacker p =
   A.object $ join [
-      "variables" .=? (listToObject <$> list (fromVariable <$> variables p))
+      "variables" .=? (listToObject <$> list (fromUserVariable <$> variables p))
     , "builders" .=? list (fromBuilder <$> builders p)
     , "provisioners" .=? list (fromProvisioner <$> provisioners p)
     , "post-processors" .=? list (fromPostProcessor <$> postProcessors p)
     ]
 
+-- | Builder serialization
 fromBuilder :: Builder -> Value
 fromBuilder (Builder btype name comm) =
   A.object $ join [
@@ -143,11 +191,13 @@ fromBuilder (Builder btype name comm) =
     , fromCommunicator comm
     ]
 
+-- | BuilderType serialization
 fromBuilderType :: BuilderType -> [A.Pair]
 fromBuilderType = \case
-  AmazonEBSBuilder ebs ->
-    "type" .= t "amazon-ebs" : AmazonEC2.fromEBS ebs
+  AmazonEBSBuilder aws ->
+    "type" .= t "amazon-ebs" : AmazonEC2.fromAWS AmazonEC2.fromEBS aws
 
+-- | Communicator serialization
 fromCommunicator :: Communicator -> [A.Pair]
 fromCommunicator = \case
   None ->
@@ -160,11 +210,12 @@ fromCommunicator = \case
   WinRm ->
     []
 
-
-fromVariable :: Variable -> A.Pair
-fromVariable (Variable k v) =
+-- | UserVariable serialization
+fromUserVariable :: UserVariable -> A.Pair
+fromUserVariable (UserVariable k v) =
   k .= v
 
+-- | Provisioner serialization
 fromProvisioner :: Provisioner -> Value
 fromProvisioner p =
   A.object $ join [
@@ -177,6 +228,7 @@ fromProvisioner p =
 --    , "override" .=?
     ]
 
+-- | PostProcessor serialization
 fromPostProcessor :: PostProcessor -> Value
 fromPostProcessor _ =
   A.object $ join [

@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+
 module Kerry.Serial (
     list
   , listToObject
@@ -11,18 +12,20 @@ module Kerry.Serial (
   , asTextWith
   , asByteStringWith
 
+  , prettyAsTextWith
+  , prettyAsByteStringWith
+
   ) where
-
-
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString.Lazy as Lazy
-import           Data.Text (Text)
-import qualified Data.Text.Encoding as T
 
 import           Data.Aeson (Value, (.=))
 import qualified Data.Aeson as A
 import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Encode.Pretty as Pretty
 import qualified Data.Aeson.Types as A
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Lazy as Lazy
+import           Data.Text (Text)
+import qualified Data.Text.Encoding as T
 
 import           Kerry.Prelude
 
@@ -53,3 +56,11 @@ asTextWith from =
 asByteStringWith :: (a -> Value) -> a -> ByteString
 asByteStringWith from =
   Lazy.toStrict . Aeson.encode . from
+
+prettyAsTextWith :: (a -> Value) -> a -> Text
+prettyAsTextWith from =
+  T.decodeUtf8 . asByteStringWith from
+
+prettyAsByteStringWith :: (a -> Value) -> a -> ByteString
+prettyAsByteStringWith from =
+  Lazy.toStrict . Pretty.encodePretty . from

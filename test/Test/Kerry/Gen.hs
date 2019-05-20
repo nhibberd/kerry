@@ -27,15 +27,15 @@ import           Kerry.Prelude
 genPacker :: Gen Packer
 genPacker =
   Packer
-    <$> Gen.list (Range.linear 0 10) genVariable
+    <$> Gen.list (Range.linear 0 10) genUserVariable
     <*> genBuilders
     <*> Gen.list (Range.linear 0 10) genProvisioner
     <*> Gen.list (Range.linear 0 0) genPostProcessor
 
 -- TODO functions
-genVariable :: Gen Variable
-genVariable =
-  Variable
+genUserVariable :: Gen UserVariable
+genUserVariable =
+  UserVariable
     <$> Gen.text (Range.linear 3 10) Gen.alphaNum
     <*> Gen.text (Range.linear 3 10) Gen.alphaNum
 
@@ -46,14 +46,24 @@ genBuilders = do
 
 genBuilder :: Gen (Int -> Builder)
 genBuilder = do
-  btype <- AmazonEBSBuilder <$> genEBSBuilder
   comm <- SSH <$> genSSHCommunicator
   name <- Gen.maybe $ Gen.element agile
+  ebs <- genEBSBuilder
+  aws <- genAWS ebs
   pure $ \index ->
     Builder
-      btype
+      (AmazonEBSBuilder aws)
       ((\n -> n <> "-" <> T.pack (show index)) <$> name)
       comm
+
+
+genAWS :: MonadGen m => builder -> m (AWS builder)
+genAWS builder =
+  AWS
+    <$> pure "us-west-2"
+    <*> Gen.element [EnvironmentVariables, AWSProfile "test-profile"]
+    <*> pure builder
+
 
 genEBSBuilder :: MonadGen m => m EBS
 genEBSBuilder =
@@ -64,16 +74,15 @@ genEBSBuilder =
     <*> pure Nothing
     <*> pure Nothing
     <*> pure Nothing
+    <*> pure Nothing
+    <*> pure Nothing
+    <*> pure Nothing
+    <*> pure Nothing
     <*> pure []
-    <*> pure Nothing
-    <*> pure Nothing
-    <*> pure Nothing
-    <*> pure Nothing
+    <*> pure mempty
     <*> pure Nothing
     <*> pure mempty
-    <*> pure mempty
-
-
+    <*> pure Nothing
 
 genCommunicator :: Gen Communicator
 genCommunicator =
