@@ -8,8 +8,7 @@ module Kerry.Example (
 
 import qualified Data.Map as Map
 
-import           Kerry.Builder.AmazonEC2
-import           Kerry.Data
+import           Kerry
 import qualified Kerry.Engine as F
 
 import           Kerry.Internal.Prelude

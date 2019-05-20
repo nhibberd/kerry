@@ -5,20 +5,21 @@
 
 module Kerry.Builder.AmazonEC2 (
   -- * General AmazonEC2 Builder
-    Credentials (..)
-  , AWS (..)
+    Credentials(..)
+  , AWS(..)
   , fromAWS
 
   -- * Utilities
-  , SourceAmi (..)
-  , AWSAmiOwner (..)
-  , SourceAmiFilterKey (..)
-  , BlockDeviceMapping (..)
+  , SourceAmi(..)
+  , AWSAmiOwner(..)
+  , SourceAmiFilterKey(..)
+  , BlockDeviceMapping(..)
   , blockDeviceMapping
 
   -- * Builders
   -- ** EBS Backed
-  , EBS (..)
+  , EBS(..)
+  , ebs
   , fromEBS
 
   ) where
@@ -224,6 +225,7 @@ data BlockDeviceMapping =
     , blockDeviceMappingNoDevice :: Maybe Bool
     } deriving (Eq, Show)
 
+-- | Construct a basic 'BlockDeviceMapping'
 blockDeviceMapping :: Text -> Text -> Int -> Bool -> BlockDeviceMapping
 blockDeviceMapping name vtype vsize delete =
   BlockDeviceMapping {
@@ -313,23 +315,45 @@ data EBS =
     } deriving (Eq, Show)
 
 
+-- | Construct a basic @amazon-ebs@ builder.
+ebs :: Text -> SourceAmi -> Text -> EBS
+ebs name sourceami instancetype =
+  EBS {
+      ebsAmiName = name
+    , ebsSourceAmi = sourceami
+    , ebsInstanceType = instancetype
+    , ebsAmiDescription = Nothing
+    , ebsAmiRegions = Nothing
+    , ebsAmiUsers = Nothing
+    , ebsAssociatePublicIpAddress = Nothing
+    , ebsAvailabilityZone = Nothing
+    , ebsIAMInstanceProfile = Nothing
+    , ebsInsecureSkipTLSVerify = Nothing
+    , ebsLaunchBlockDeviceMappings = []
+    , ebsRunTags = mempty
+    , ebsSubnetId = Nothing
+    , ebsTags = mempty
+    , ebsVpcId = Nothing
+    }
+
+-- | EBS serialization
 fromEBS :: EBS -> [Aeson.Pair]
-fromEBS ebs = join [
-    ["ami_name" .= ebsAmiName ebs]
-  , [fromSourceAmi $ ebsSourceAmi ebs]
-  , ["instance_type" .= ebsInstanceType ebs]
-  , "ami_description" .=? ebsAmiDescription ebs
-  , "ami_regions" .=? ebsAmiRegions ebs
-  , "ami_users" .=? ebsAmiUsers ebs
-  , "associate_public_ip_address" .=? ebsAssociatePublicIpAddress ebs
-  , "availability_zone" .=? ebsAvailabilityZone ebs
-  , "iam_instance_profile" .=? ebsIAMInstanceProfile ebs
-  , "insecure_skip_tls_verify" .=? ebsInsecureSkipTLSVerify ebs
-  , "launch_block_device_mappings" .=? list (fromBlockDeviceMapping <$> ebsLaunchBlockDeviceMappings ebs)
-  , ["run_tags" .= fromMap (ebsRunTags ebs)]
-  , "subnet_id" .=? ebsSubnetId ebs
-  , ["tags" .= fromMap (ebsTags ebs)]
-  , "vpc_id" .=? ebsVpcId ebs
+fromEBS e = join [
+    ["ami_name" .= ebsAmiName e]
+  , [fromSourceAmi $ ebsSourceAmi e]
+  , ["instance_type" .= ebsInstanceType e]
+  , "ami_description" .=? ebsAmiDescription e
+  , "ami_regions" .=? ebsAmiRegions e
+  , "ami_users" .=? ebsAmiUsers e
+  , "associate_public_ip_address" .=? ebsAssociatePublicIpAddress e
+  , "availability_zone" .=? ebsAvailabilityZone e
+  , "iam_instance_profile" .=? ebsIAMInstanceProfile e
+  , "insecure_skip_tls_verify" .=? ebsInsecureSkipTLSVerify e
+  , "launch_block_device_mappings" .=? list (fromBlockDeviceMapping <$> ebsLaunchBlockDeviceMappings e)
+  , ["run_tags" .= fromMap (ebsRunTags e)]
+  , "subnet_id" .=? ebsSubnetId e
+  , ["tags" .= fromMap (ebsTags e)]
+  , "vpc_id" .=? ebsVpcId e
   ]
 
 fromSourceAmi :: SourceAmi -> Aeson.Pair
