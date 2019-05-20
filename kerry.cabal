@@ -7,10 +7,12 @@ homepage:
 bug-reports:
   https://github.com/nhibberd/kerry/issues
 synopsis:
-  kerry
+  Manage and abstract your packer configurations.
 description:
-  kerry is a DSL for representing and rendering
-  [packer](https://www.packer.io/) definitions.
+  Kerry is a library for representing and rendering
+  <https://www.packer.io/ packer> definitions.
+  .
+  To get started quickly, see the <https://github.com/nhibberd/kerry/blob/master/src/Kerry/Example.hs example>.
 license:
   BSD3
 category:
