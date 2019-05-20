@@ -14,9 +14,8 @@ import qualified Data.ByteString.Char8 as Char8
 import           Hedgehog
 
 import           Kerry.Prelude
-import           Kerry.Example (example)
 import           Kerry.Data (Packer, fromPacker)
-import           Kerry.Serial (asByteStringWith)
+import           Kerry.Serial (prettyAsByteStringWith)
 
 import           System.Exit (ExitCode (..))
 import qualified System.IO.Temp as Temp
@@ -24,11 +23,6 @@ import qualified System.IO as IO
 import qualified System.Process as Process
 
 import qualified Test.Kerry.Gen as Gen
-
-prop_example :: Property
-prop_example =
-  withTests 1 . property $ do
-    validate example
 
 prop_gen :: Property
 prop_gen =
@@ -41,7 +35,7 @@ validate packer =
   hoist runResourceT $ do
     (_release, path, handle) <- Temp.openTempFile Nothing "example.json"
     let
-      raw = asByteStringWith (fromPacker) packer
+      raw = prettyAsByteStringWith (fromPacker) packer
     annotate $ show raw
 
     liftIO $ Char8.hPutStrLn handle raw
