@@ -20,7 +20,7 @@ example =
           UserVariable "name" "example-packer"
         ]
     , builders = [
-          Builder (AmazonEBSBuilder $ aws ebs) Nothing ssh
+          Builder (AmazonEBSBuilder $ aws builder) Nothing ssh
         ]
     , provisioners = []
     , postProcessors = []
@@ -31,15 +31,15 @@ ssh =
   SSH $ defaultSSHCommunicator "ec2-user"
 
 aws :: a -> AWS a
-aws builder =
+aws b =
   AWS {
       awsRegion = "us-west-2"
     , awsCredentials = EnvironmentVariables
-    , awsBuilder = builder
+    , awsBuilder = b
     }
 
-ebs :: EBS
-ebs =
+builder :: EBS
+builder =
   EBS {
       ebsAmiName = "test"
     , ebsSourceAmi = SourceAmiId "ami-fred"
