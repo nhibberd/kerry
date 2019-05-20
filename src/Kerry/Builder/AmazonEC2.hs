@@ -130,6 +130,7 @@ data SourceAmiFilterKey =
   | TagKey
   -- | The virtualization type (paravirtual | hvm).
   | VirtualizationType
+--    deriving (Eq, Show, Enum, Bounded)
     deriving (Eq, Show)
 
 renderSourceAmiFilterKey :: SourceAmiFilterKey -> Text

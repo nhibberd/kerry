@@ -15,7 +15,7 @@ import qualified Data.Map as Map
 import qualified Data.Text as T
 
 import           Hedgehog
-import           Hedgehog.Corpus (agile)
+import qualified Hedgehog.Corpus as Corpus
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
@@ -47,7 +47,7 @@ genBuilders = do
 genBuilder :: Gen (Int -> Builder)
 genBuilder = do
   comm <- SSH <$> genSSHCommunicator
-  name <- Gen.maybe $ Gen.element agile
+  name <- Gen.maybe $ Gen.element Corpus.agile
   ebs <- genEBSBuilder
   aws <- genAWS ebs
   pure $ \index ->
@@ -64,25 +64,32 @@ genAWS builder =
     <*> Gen.element [EnvironmentVariables, AWSProfile "test-profile"]
     <*> pure builder
 
-
 genEBSBuilder :: MonadGen m => m EBS
 genEBSBuilder =
   EBS
     <$> Gen.text (Range.linear 3 10) Gen.alphaNum
     <*> (SourceAmiId . (<>) "ami-" <$> Gen.text (Range.singleton 8) Gen.alphaNum)
     <*> Gen.element ["t2.micro", "m4.xlarge", "x1.large"]
-    <*> pure Nothing
-    <*> pure Nothing
-    <*> pure Nothing
-    <*> pure Nothing
-    <*> pure Nothing
-    <*> pure Nothing
-    <*> pure Nothing
+    <*> Gen.maybe (Gen.text (Range.singleton 8) Gen.alphaNum)
+    <*> Gen.maybe (pure ["us-east-1"])
+    <*> Gen.maybe (pure ["123456789123", "123456789456"])
+    <*> Gen.maybe Gen.bool
+    <*> Gen.maybe (pure "us-west-2a")
+    <*> Gen.maybe (pure "packer")
+    <*> Gen.maybe Gen.bool
     <*> pure []
-    <*> pure mempty
-    <*> pure Nothing
-    <*> pure mempty
-    <*> pure Nothing
+    <*> genMap
+    <*> Gen.maybe (pure "subnet-1234567abcd12345e")
+    <*> genMap
+    <*> Gen.maybe (pure "vpc-1234567abcd12345")
+
+genMap :: MonadGen m => m (Map Text Text)
+genMap =
+  Gen.choice [
+      pure mempty
+    , Gen.map (Range.linear 0 4) $
+        Gen.element (zip Corpus.cooking Corpus.vegetables)
+    ]
 
 genCommunicator :: Gen Communicator
 genCommunicator =
