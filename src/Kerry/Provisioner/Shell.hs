@@ -47,11 +47,11 @@ data Shell =
     -- | The shebang value to use when running commands specified by inline. By default, this is /bin/sh -e. If you're not using inline, then this configuration has no effect. Important: If you customize this, be sure to include something like the -e flag, otherwise individual steps failing won't fail the provisioner.
     , shellInlineShebang :: Maybe Text
     -- | The folder where the uploaded script will reside on the machine. This defaults to '/tmp'.
-    , shellRemoteFolder :: Maybe Text
+    , shellRemoteFolder :: Maybe FilePath
     -- | The filename the uploaded script will have on the machine. This defaults to 'script_nnn.sh'.
     , shellRemoteFile :: Maybe Text
     -- | The full path to the uploaded script will have on the machine. By default this is remote_folder/remote_file, if set this option will override both remote_folder and remote_file.
-    , shellRemotePath :: Maybe Text
+    , shellRemotePath :: Maybe FilePath
     -- | If true, specifies that the helper scripts uploaded to the system will not be removed by Packer. This defaults to false (clean scripts from the system).
     , shellSkipClean :: Maybe Bool
     -- | The amount of time to attempt to start the remote process. By default this is 5m or 5 minutes. This setting exists in order to deal with times when SSH may restart, such as a system reboot. Set this to a higher value if reboots take a longer amount of time.
