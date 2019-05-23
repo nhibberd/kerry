@@ -3,6 +3,8 @@ kerry
 
 [Packer](https://www.packer.io/) configuration and serialization.
 
+[![Hackage][hackage-shield]][hackage]
+
 
 
 ## Example
@@ -48,3 +50,10 @@ builder =
    "m4.xlarge"
 
 ```
+
+
+
+
+
+ [hackage]: http://hackage.haskell.org/package/kerry
+ [hackage-shield]: https://img.shields.io/badge/hackage-v0.0.1-blue.svg
