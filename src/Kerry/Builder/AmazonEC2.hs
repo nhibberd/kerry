@@ -36,14 +36,14 @@ data Credentials =
     AWSProfile Text
   | EnvironmentVariables
   -- TODO explicit keys?
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 data AWS x =
   AWS {
       awsRegion :: Text
     , awsCredentials :: Credentials
     , awsBuilder :: x
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 fromAWS :: (a -> [Aeson.Pair]) -> AWS a -> [Aeson.Pair]
 fromAWS fromBuilder (AWS region creds builder) =
@@ -60,13 +60,13 @@ fromAWS fromBuilder (AWS region creds builder) =
 data SourceAmi =
     SourceAmiId Text
   | SourceAmiFilter (Map SourceAmiFilterKey Text) AWSAmiOwner Bool
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 data AWSAmiOwner =
     Accounts [Text]
   | Self
   | Alias Text
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 data SourceAmiFilterKey =
   -- | The image architecture (i386 | x86_64).
@@ -131,8 +131,8 @@ data SourceAmiFilterKey =
   | TagKey
   -- | The virtualization type (paravirtual | hvm).
   | VirtualizationType
---    deriving (Eq, Show, Enum, Bounded)
-    deriving (Eq, Show)
+--    deriving (Eq, Ord, Show, Enum, Bounded)
+    deriving (Eq, Ord, Show)
 
 renderSourceAmiFilterKey :: SourceAmiFilterKey -> Text
 renderSourceAmiFilterKey = \case
@@ -223,7 +223,7 @@ data BlockDeviceMapping =
     , blockDeviceMappingVirtualName :: Maybe Text -- prefixed with 'ephemeral' for
     -- | The virtual device name. See the documentation on Block Device Mapping for more information
     , blockDeviceMappingNoDevice :: Maybe Bool
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 -- | Construct a basic 'BlockDeviceMapping'
 blockDeviceMapping :: Text -> Text -> Int -> Bool -> BlockDeviceMapping
@@ -312,7 +312,7 @@ data EBS =
     , ebsVpcId :: Maybe Text -- ^ vpc_id
     -- vpc_filter - https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html
     -- windows_password_timeout
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 
 -- | Construct a basic @amazon-ebs@ builder.

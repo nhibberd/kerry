@@ -41,12 +41,12 @@ import           Kerry.Internal.Prelude
 newtype Template =
   Template {
       renderTemplate :: Text
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 newtype RawTemplate =
   RawTemplate {
       _rawTemplate :: Text
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 toTemplate :: RawTemplate -> Template
 toTemplate (RawTemplate raw) =

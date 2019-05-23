@@ -58,7 +58,7 @@ data Shell =
     , shellStartRetryTimeout :: Maybe Text
     -- | Wait the amount of time after provisioning a shell script, this pause be taken if all previous steps were successful.
     , shellPauseAfter :: Maybe Text
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 -- | Basic 'Shell'
 shell :: ShellType -> Shell
@@ -86,7 +86,7 @@ data ShellType =
     Inline [Text]
   | Script Text
   | Scripts [Text]
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 
 -- | Shell serialization

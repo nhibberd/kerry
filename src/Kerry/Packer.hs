@@ -55,7 +55,7 @@ import           Kerry.Internal.Serial (list, listToObject, prettyAsTextWith, (.
 
 data UserVariable =
   UserVariable Text Text
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 -- |
 -- Builders
@@ -69,12 +69,12 @@ data Builder =
       builderType :: BuilderType
     , builderName :: Maybe Text
     , builderCommunicator :: Communicator
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 -- | Concrete 'BuilderType'
 data BuilderType =
     AmazonEBSBuilder (AmazonEC2.AWS AmazonEC2.EBS)
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 -- |
 -- Provisioner
@@ -91,7 +91,7 @@ data Provisioner =
     , provisionerPauseBefore :: Maybe Text
     , provisionerTimeout :: Maybe Text
     , provisionerOverride :: Maybe (Map Text (Map Text Text))
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 -- | Basic 'Provisioner'
 provisioner :: ProvisionerType -> Provisioner
@@ -109,11 +109,11 @@ provisioner pt =
 data ProvisionerType =
     ShellProvisioner Shell.Shell
   | FileProvisioner File.File
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 data PostProcessor =
   PostProcessor
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 -- |
 -- Packer
@@ -126,7 +126,7 @@ data Packer =
     , builders :: [Builder]
     , provisioners :: [Provisioner]
     , postProcessors :: [PostProcessor]
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 -- |
 -- Communicator
@@ -142,7 +142,7 @@ data Communicator =
   | SSH SSHCommunicator
   -- | A WinRM connection will be established.
   | WinRm
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 
 -- |
@@ -176,7 +176,7 @@ data SSHCommunicator =
 -- 'ssh_proxy_port' (number) - A port of the SOCKS proxy. Defaults to 1080.
 -- 'ssh_proxy_username' (string) - The username to authenticate with the proxy server. Optional.
 -- 'ssh_read_write_timeout' (string) - The amount of time to wait for a remote command to end. This might be useful if, for example, packer hangs on a connection after a reboot. Example: 5m. Disabled by default.
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 -- |
 -- A minimal default @ssh@ communicator where only the @username@

@@ -28,13 +28,13 @@ data File =
     , fileDirection :: FileDirection
     -- | For advanced users only. If true, check the file existence only before uploading, rather than upon pre-build validation. This allows to upload files created on-the-fly. This defaults to false. We don't recommend using this feature, since it can cause Packer to become dependent on system state. We would prefer you generate your files before the Packer run, but realize that there are situations where this may be unavoidable.
     , fileGenerated :: Maybe Bool
-    } deriving (Eq, Show)
+    } deriving (Eq, Ord, Show)
 
 -- | 'FileDirection'
 data FileDirection =
     FileUpload
   | FileDownload
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 renderFileDirection :: FileDirection -> Text
 renderFileDirection = \case

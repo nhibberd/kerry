@@ -25,7 +25,7 @@ main = do
 
 data Command =
     KerryReverse !Reverse
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 parser :: Parser Command
 parser =
