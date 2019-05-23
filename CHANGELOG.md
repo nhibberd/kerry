@@ -1,3 +1,7 @@
+## Version 0.1.1
+
+- Ord isntances ([@nhibberd][nhibberd])
+
 ## Version 0.1
 
 - Initial Packer types ([@nhibberd][nhibberd])
