@@ -1,6 +1,6 @@
 ## Version 0.1.1
 
-- Ord isntances ([@nhibberd][nhibberd])
+- Ord instances ([@nhibberd][nhibberd])
 
 ## Version 0.1
 
